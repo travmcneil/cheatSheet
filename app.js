@@ -59,7 +59,7 @@ app.post("/articles", (req, res) => {
   res.redirect('/articles')
 });
 
-app.get('/delete', (req, res) => {
+app.delete('/articles', (req, res) => {
   Article.deleteMany({}).then((data) =>{
     res.redirect('/articles')
   });
