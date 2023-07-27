@@ -35,34 +35,45 @@ const articlesSchema = new mongoose.Schema({
 
 const Article = mongoose.model("Article", articlesSchema);
 
-app.get('/', (req, res) => {
-  res.render('home');
+app.get("/", (req, res) => {
+  res.render("home");
 });
 
-app.get("/articles", (req, res) => {
-  Article.find({})
+app
+  .route("/articles")
+  .get(function (req, res) {
+    Article.find({})
+      .then((data) => {
+        res.send({ data });
+      })
+      .catch((error) => {
+        res.send(error);
+      });
+  })
+
+  .post(function (req, res) {
+    const articles = new Article({
+      title: req.body.title,
+      content: req.body.content,
+    });
+    articles.save();
+    res.redirect("/articles");
+  })
+  
+  .delete(function (req, res) {
+    Article.deleteMany({}).then((data) => {
+      res.redirect("/articles");
+    });
+  });
+
+app.get("/article/:articleId", (req, res) => {
+  Article.find({ _id: req.params.articleId })
     .then((data) => {
       res.send({ data });
     })
     .catch((error) => {
       res.send(error);
     });
-});
-
-app.post("/articles", (req, res) => {
-  
-  const articles = new Article ({
-    title: req.body.title,
-    content: req.body.content
-  })
-  articles.save();
-  res.redirect('/articles')
-});
-
-app.delete('/articles', (req, res) => {
-  Article.deleteMany({}).then((data) =>{
-    res.redirect('/articles')
-  });
 });
 
 app.listen(port, () => {
