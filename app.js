@@ -5,7 +5,7 @@ const app = express();
 const port = 3000;
 const bodyParser = require("body-parser");
 const _ = require("lodash");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,28 +18,53 @@ app.use(
   })
 );
 
-mongoose.connect('mongodb://127.0.0.1:27017/cheatsheetDB', { useNewUrlParser: true });
+mongoose.connect("mongodb://127.0.0.1:27017/cheatsheetDB", {
+  useNewUrlParser: true,
+});
 
-const articlesSchema = new mongoose.Schema ({
-    title: {
-      type: String,
-      required: [true, "Must have a title"]
-    },
-    content: {
-      type: String,
-      required: [true, "Must have some content"]
-    },
-  })
+const articlesSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, "Must have a title"],
+  },
+  content: {
+    type: String,
+    required: [true, "Must have some content"],
+  },
+});
 
-  const Article = mongoose.model("Article", articlesSchema);
+const Article = mongoose.model("Article", articlesSchema);
 
-app.get("/", (req, res) => {
-    Article.findOne({}).then((data) =>{
-        res.render("home", {sheet: data});
+app.get('/', (req, res) => {
+  res.render('home');
+});
+
+app.get("/articles", (req, res) => {
+  Article.find({})
+    .then((data) => {
+      res.send({ data });
+    })
+    .catch((error) => {
+      res.send(error);
     });
 });
 
+app.post("/articles", (req, res) => {
+  
+  const articles = new Article ({
+    title: req.body.title,
+    content: req.body.content
+  })
+  articles.save();
+  res.redirect('/articles')
+});
+
+app.get('/delete', (req, res) => {
+  Article.deleteMany({}).then((data) =>{
+    res.redirect('/articles')
+  });
+});
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening on port ${port}`);
 });
