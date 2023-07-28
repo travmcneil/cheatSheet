@@ -25,11 +25,9 @@ mongoose.connect("mongodb://127.0.0.1:27017/cheatsheetDB", {
 const articlesSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, "Must have a title"],
   },
   content: {
     type: String,
-    required: [true, "Must have some content"],
   },
 });
 
@@ -59,22 +57,45 @@ app
     articles.save();
     res.redirect("/articles");
   })
-  
+
   .delete(function (req, res) {
     Article.deleteMany({}).then((data) => {
       res.redirect("/articles");
     });
   });
 
-app.get("/article/:articleId", (req, res) => {
-  Article.find({ _id: req.params.articleId })
-    .then((data) => {
+app.route("/article/:articleId")
+  .get(function (req, res) {
+    console.log(req.params.articleId);
+    Article.findById(req.params.articleId).then((data) =>{
       res.send({ data });
     })
-    .catch((error) => {
-      res.send(error);
+  })
+  .put(function (req, res) {
+    Article.findByIdAndUpdate(req.params.articleId).then((data) => {
+      data.title = req.body.title;
+      data.content = req.body.content;
+      data.save();
+      res.send({ data });
     });
-});
+  })
+  .patch(function (req, res) {
+    Article.findByIdAndUpdate(req.params.articleId ).then((data) => {
+      data.title = req.body.title;
+      data.content = req.body.content;
+      data.save();
+      res.send({ data });
+    }).catch((data) => {
+      res.send({ data });
+    })
+  })
+  .delete(function (req, res) {
+    Article.deleteOne({ _id: req.params.articleId }).then((data) => {
+      res.redirect("/articles");
+    });
+  });
+  
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
